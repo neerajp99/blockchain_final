@@ -26,14 +26,21 @@ export default function Home() {
                     return alert("Please install metamask.");
                 }
                 // Get the accounts if metamask is connected
-                const accounts = await window.ethereum.request({
+                await window.ethereum.request({
                     method: "eth_accounts",
                 });
+                const web3 = new Web3(window.ethereum);
+                /* set web3 instance in React state */
+                setWeb3Object(web3);
+                const accounts = await web3.eth.getAccounts();
 
                 // If there are accounts, set the current account
                 if (accounts.length) {
                     console.log("Accounts: ", accounts);
                     setCurrentAccount(accounts[0]);
+                    // Set the ethereum contract
+                    const tendermeAbiContract = await tendermeContract(web3);
+                    setAbiContract(tendermeAbiContract);
                 } else {
                     console.log("No accounts found.");
                 }
@@ -173,6 +180,10 @@ export default function Home() {
             getTenderID();
         }
     }, [abiContract]);
+
+    useEffect(() => {
+        checkForMetamaskWallet();
+    }, []);
 
     console.log("Current Acount: ", currentAccount);
     console.log("Current contract", abiContract);
